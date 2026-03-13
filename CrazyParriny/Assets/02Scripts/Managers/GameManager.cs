@@ -16,11 +16,17 @@ public class GameManager : Singleton<GameManager>
 
     private void SetDefaultGameSettings()
     {
-
+        Application.targetFrameRate = 60;
     }
 
-    private async void Init()
+    public async override void Init()
     {
-
+        await ResourceManager.Instance.LoadResource();
+        await PoolManager.Instance.PreWarm();
+        await SoundManager.Instance.Prewarm();
+        //await DataManager.Instance.Prewarm();
+        
+        UIManager.Instance.Init();
+        TitleManager.Instance.Init();
     }
 }

@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityEditor.AddressableAssets.Build.Layout;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -155,5 +154,13 @@ public class ResourceManager : Singleton<ResourceManager>
             };
             await handler;
         }
+    }
+
+    public T GetAsset<T>(string key)
+    {
+        // 어드레서블 동기 로드 핵심: .WaitForCompletion()
+        var handle = Addressables.LoadAssetAsync<T>(key);
+        var loadedPrefab = handle.WaitForCompletion();
+        return loadedPrefab;
     }
 }

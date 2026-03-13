@@ -6,3 +6,9 @@ public enum eUIPosition
     Fade,
     Top
 }
+
+public enum eAudioType
+{
+    Bgm,
+    Sfx
+}
