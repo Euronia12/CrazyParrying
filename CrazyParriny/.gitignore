@@ -1,0 +1,39 @@
+# Unity generated folders
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+
+# Unity auto-generated VS solution/project files
+*.suo
+*.tmp
+*.user
+*.sln
+*.csproj
+*.unityproj
+
+# Visual Studio / Rider cache
+.vs/
+.vscode/
+.idea/
+
+# Unity crash report
+sysinfo.txt
+Crashes/
+
+# Build output
+*.apk
+*.aab
+*.ipa
+*.exe
+*.x86
+*.x86_64
+*.app
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
