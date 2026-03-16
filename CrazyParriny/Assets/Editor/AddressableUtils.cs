@@ -33,33 +33,42 @@ internal class AddressableUtils : Editor
     {
         var settings = AddressableAssetSettingsDefaultObject.Settings;
 
-        foreach (var group in settings.groups)
+        // 여러 ImportAsset 호출을 단일 배치로 묶어 TLS temp 할당 최소화
+        AssetDatabase.StartAssetEditing();
+        try
         {
-            if (!Enum.TryParse(group.Name, out eAddressableType type))
+            foreach (var group in settings.groups)
             {
-                Debug.LogWarning($"[AddressableUtils] 그룹 이름 '{group.Name}'은 eAddressableType에 없음");
-                continue;
-            }
-
-            foreach (var entry in group.entries)
-            {
-                if (!entry.AssetPath.Contains("Assets") || entry.AssetPath.Contains("addressableMap"))
-                    continue;
-
-                string dir = Application.dataPath + entry.AssetPath.Replace("Assets", "");
-
-                if (!Directory.Exists(dir))
+                if (!Enum.TryParse(group.Name, out eAddressableType type))
                 {
-                    Debug.LogWarning($"[AddressableUtils] 경로가 폴더가 아님 (스킵됨): {dir}");
+                    Debug.LogWarning($"[AddressableUtils] 그룹 이름 '{group.Name}'은 eAddressableType에 없음");
                     continue;
                 }
 
-                var mapData = SetMapping(dir, type);
-                var newPath = entry.AssetPath + "/addressableMap.json";
-                var dt = JsonUtility.ToJson(mapData);
-                File.WriteAllText(newPath, dt);
-                AssetDatabase.ImportAsset(newPath);
+                foreach (var entry in group.entries)
+                {
+                    if (!entry.AssetPath.Contains("Assets") || entry.AssetPath.Contains("addressableMap"))
+                        continue;
+
+                    string dir = Application.dataPath + entry.AssetPath.Replace("Assets", "");
+
+                    if (!Directory.Exists(dir))
+                    {
+                        Debug.LogWarning($"[AddressableUtils] 경로가 폴더가 아님 (스킵됨): {dir}");
+                        continue;
+                    }
+
+                    var mapData = SetMapping(dir, type);
+                    var newPath = entry.AssetPath + "/addressableMap.json";
+                    var dt = JsonUtility.ToJson(mapData);
+                    File.WriteAllText(newPath, dt);
+                    AssetDatabase.ImportAsset(newPath);
+                }
             }
+        }
+        finally
+        {
+            AssetDatabase.StopAssetEditing();
         }
     }
 
@@ -67,6 +76,7 @@ internal class AddressableUtils : Editor
     {
         var files = Directory.GetFiles(dir).ToList();
         files.RemoveAll(obj => obj.Contains(".meta"));
+        files.RemoveAll(obj => obj.Contains("addressableMap.json"));
         AddressableMapData mapData = new AddressableMapData();
         var dirs = Directory.GetDirectories(dir).ToList();
         foreach (var d in dirs)

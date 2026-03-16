@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class GameManager : Singleton<GameManager>
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected override void Awake()
     {
         base.Awake();
@@ -22,11 +21,17 @@ public class GameManager : Singleton<GameManager>
     public async override void Init()
     {
         await ResourceManager.Instance.LoadResource();
+        //await DataManager.Instance.Prewarm();
+        UIManager.Instance.Init();
+        await TitleManager.Instance.SetupAsync();
+
         await PoolManager.Instance.PreWarm();
         await SoundManager.Instance.Prewarm();
-        //await DataManager.Instance.Prewarm();
-        
-        UIManager.Instance.Init();
-        TitleManager.Instance.Init();
+    }
+
+    public void OnQuitGame()
+    {
+        isQuitting = true;
+        Application.Quit();
     }
 }

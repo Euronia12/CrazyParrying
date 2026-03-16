@@ -1,21 +1,22 @@
 
 public enum eAddressableType
 {
-    animation,
+    DefaultLocalGroup,
+    //animation,
     //data,
     //material,
     //particle,
-    prevPrefap,
-    prefab,
+    PrevPrefab,
+    Prefab,
     //skybox,
-    prevSound,
-    sound,
-    thumbnail,
-    ui,
+    PrevSound,
+    Sound,
+    //thumbnail,
+    UI,
     //uiimage,
-    font,
-    scene,
-    max
+    //font,
+    //scene,
+    Max,
 }
 
 public enum eAssetType

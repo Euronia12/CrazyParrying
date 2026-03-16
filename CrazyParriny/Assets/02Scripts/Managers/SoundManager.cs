@@ -35,19 +35,25 @@ public class SoundManager : Singleton<SoundManager>
     private AudioSource CurrentBgmSource => isUsingSourceA ? bgmSourceA : bgmSourceB;
     private AudioSource NextBgmSource => isUsingSourceA ? bgmSourceB : bgmSourceA;
 
-    //ÃÖÃÊ ÇÊ¿ä ¿Àµð¿À ·Îµå
+    //ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½
     public async UniTask Prewarm()
     {
+        var ResourceMgr = ResourceManager.Instance;
+
+        await ResourceMgr.LoadAsset<AudioMixer>("AudioMixer", eAddressableType.DefaultLocalGroup, (obj) =>
+        {
+            audioMixer = obj;
+        });
+
         if (audioMixer == null)
         {
             Debug.LogError("AudioMixer is null"); 
             return;
         }
 
-        var ResourceMgr = ResourceManager.Instance;
-        foreach(var key in ResourceMgr.addressableMap[eAddressableType.prevSound].Keys)
+        foreach(var key in ResourceMgr.addressableMap[eAddressableType.PrevSound].Keys)
         {
-            await ResourceMgr.LoadAsset<AudioClip>(key, eAddressableType.prevSound, (clip) =>
+            await ResourceMgr.LoadAsset<AudioClip>(key, eAddressableType.PrevSound, (clip) =>
             {
                 if(key.Contains("Bgm_"))
                 {
@@ -66,10 +72,10 @@ public class SoundManager : Singleton<SoundManager>
         }
     }
 
-    //Ãß°¡ ¿Àµð¿À ·Îµå
+    //ï¿½ß°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½
     public async Task LoadAudio(eAudioType type, string clipName)
     {
-        // ÀÌ¹Ì ÀÖ´ÂÁö Ã¼Å©
+        // ï¿½Ì¹ï¿½ ï¿½Ö´ï¿½ï¿½ï¿½ Ã¼Å©
         if (type == eAudioType.Bgm && bgmDict.ContainsKey(clipName))
         {
             Debug.LogWarning($"Already loaded: {type} / {clipName}");
@@ -82,7 +88,7 @@ public class SoundManager : Singleton<SoundManager>
         }
 
         AudioClip clip = null;
-        await ResourceManager.Instance.LoadAsset<AudioClip>(clipName, eAddressableType.sound,(obj) =>
+        await ResourceManager.Instance.LoadAsset<AudioClip>(clipName, eAddressableType.Sound,(obj) =>
         {
             clip = obj;
         });
@@ -93,16 +99,15 @@ public class SoundManager : Singleton<SoundManager>
             return;
         }
 
-        // µñ¼Å³Ê¸®¿¡ µî·Ï
+        // ï¿½ï¿½Å³Ê¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
         if (type == eAudioType.Bgm)
             bgmDict[clipName] = clip;
         else
             sfxDict[clipName] = clip;
 
-        Debug.Log($"Audio loaded: {type} / {clipName}");
     }
 
-    // ¿©·¯ °³ ÇÑ¹ø¿¡ ·Îµù
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ñ¹ï¿½ï¿½ï¿½ ï¿½Îµï¿½
     public async Task LoadAudios(eAudioType type, params string[] clipNames)
     {
         foreach (var name in clipNames)
@@ -111,7 +116,7 @@ public class SoundManager : Singleton<SoundManager>
         }
     }
 
-    // ¿Àµð¿À ¾ð·Îµå
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Îµï¿½
     public void UnloadAudio(eAudioType type, string clipName)
     {
         if (type == eAudioType.Bgm)
@@ -122,7 +127,7 @@ public class SoundManager : Singleton<SoundManager>
             rhythmDict.Remove(clipName);
     }
 
-    // Å¸ÀÔº° ÀüÃ¼ ¾ð·Îµå
+    // Å¸ï¿½Ôºï¿½ ï¿½ï¿½Ã¼ ï¿½ï¿½Îµï¿½
     public void UnloadAllAudio(eAudioType type)
     {
         if (type == eAudioType.Bgm)
@@ -134,25 +139,25 @@ public class SoundManager : Singleton<SoundManager>
     }
 
     #region BGM
-    // ¹è°æÀ½ ¹®ÀÚ¿­·Î Àç»ý (Å©·Î½ºÆäÀÌµå)
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ú¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ (Å©ï¿½Î½ï¿½ï¿½ï¿½ï¿½Ìµï¿½)
     public void PlayBGM(string clipName)
     {
         if (!bgmDict.TryGetValue(clipName, out AudioClip clip))
         {
             Debug.LogWarning($"BGM not found: {clipName}");
-            //TODO : µ¿Àû ·Îµå ½Ã ¿©±â¿¡¼­ ·Îµå
+            //TODO : ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½â¿¡ï¿½ï¿½ ï¿½Îµï¿½
             return;
         }
 
         PlayBGM(clip);
     }
 
-    // ¹è°æÀ½ Å¬¸³À¸·Î Àç»ý (Å©·Î½ºÆäÀÌµå)
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ Å¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ (Å©ï¿½Î½ï¿½ï¿½ï¿½ï¿½Ìµï¿½)
     public void PlayBGM(AudioClip clip)
     {
         if (clip == null) return;
 
-        // °°Àº °îÀÌ¸é ¹«½Ã
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½ï¿½
         if (CurrentBgmSource.clip == clip && CurrentBgmSource.isPlaying)
             return;
 
@@ -167,12 +172,12 @@ public class SoundManager : Singleton<SoundManager>
         AudioSource fadeOut = CurrentBgmSource;
         AudioSource fadeIn = NextBgmSource;
 
-        // »õ °î ÁØºñ
+        // ï¿½ï¿½ ï¿½ï¿½ ï¿½Øºï¿½
         fadeIn.clip = newClip;
         fadeIn.volume = 0f;
         fadeIn.Play();
 
-        // Å©·Î½ºÆäÀÌµå
+        // Å©ï¿½Î½ï¿½ï¿½ï¿½ï¿½Ìµï¿½
         float elapsed = 0f;
         float startVolume = fadeOut.volume;
 
@@ -187,7 +192,7 @@ public class SoundManager : Singleton<SoundManager>
             yield return null;
         }
 
-        // ¸¶¹«¸®
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         fadeOut.Stop();
         fadeOut.volume = 0f;
         fadeIn.volume = 1f;
@@ -196,7 +201,7 @@ public class SoundManager : Singleton<SoundManager>
         crossfadeCoroutine = null;
     }
 
-    // ¹è°æÀ½ Áï½Ã Á¤Áö
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     public void StopBGM()
     {
         if (crossfadeCoroutine != null)
@@ -209,7 +214,7 @@ public class SoundManager : Singleton<SoundManager>
         bgmSourceB.Stop();
     }
 
-    // ¹è°æÀ½ ÆäÀÌµå¾Æ¿ô Á¤Áö
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìµï¿½Æ¿ï¿½ ï¿½ï¿½ï¿½ï¿½
     public void StopBGMWithFade(float duration = 1f)
     {
         if (crossfadeCoroutine != null)
@@ -236,13 +241,13 @@ public class SoundManager : Singleton<SoundManager>
         crossfadeCoroutine = null;
     }
 
-    // ¹è°æÀ½ ÀÏ½ÃÁ¤Áö
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ï½ï¿½ï¿½ï¿½ï¿½ï¿½
     public void PauseBGM()
     {
         CurrentBgmSource.Pause();
     }
 
-    // ¹è°æÀ½ Àç°³
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ç°³
     public void ResumeBGM()
     {
         CurrentBgmSource.UnPause();
@@ -251,7 +256,7 @@ public class SoundManager : Singleton<SoundManager>
     #endregion
 
     #region SFX
-    // È¿°úÀ½ Àç»ý
+    // È¿ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
     public void PlaySFX(string clipName)
     {
         if (!sfxDict.TryGetValue(clipName, out AudioClip clip))
@@ -263,21 +268,21 @@ public class SoundManager : Singleton<SoundManager>
         PlaySFX(clip);
     }
 
-    // È¿°úÀ½ Àç»ý
+    // È¿ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
     public void PlaySFX(AudioClip clip)
     {
         if (clip == null) return;
         sfxSource.PlayOneShot(clip);
     }
 
-    // È¿°úÀ½ Àç»ý (º¼·ý ÁöÁ¤)
+    // È¿ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
     public void PlaySFX(AudioClip clip, float volumeScale)
     {
         if (clip == null) return;
         sfxSource.PlayOneShot(clip, volumeScale);
     }
 
-    // È¿°úÀ½ Àç»ý (ÇÇÄ¡ ·£´ý) ex)¹ß¼Ò¸®
+    // È¿ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ (ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ï¿½) ex)ï¿½ß¼Ò¸ï¿½
     public void PlaySFXRandomPitch(AudioClip clip, float minPitch = 0.9f, float maxPitch = 1.1f)
     {
         if (clip == null) return;
@@ -288,34 +293,34 @@ public class SoundManager : Singleton<SoundManager>
         sfxSource.pitch = originalPitch;
     }
 
-    // Æ¯Á¤ À§Ä¡¿¡¼­ È¿°úÀ½ Àç»ý (3D »ç¿îµå)
-    // * ÇÑ¹ø¿¡ ÇÑ°÷¸¸ °¡´É ÃßÈÄ ¿©·¯ °÷ »ç¿ë ½Ã ¸®ÆÑÅä¸µ ÇÊ
+    // Æ¯ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ï¿½ï¿½ È¿ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ (3D ï¿½ï¿½ï¿½ï¿½)
+    // * ï¿½Ñ¹ï¿½ï¿½ï¿½ ï¿½Ñ°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ä¸µ ï¿½ï¿½
     public void PlaySFXAtPosition(AudioClip clip, Vector3 position, float volume = 1f)
     {
-        // sfxSource À§Ä¡ ÀÌµ¿
+        // sfxSource ï¿½ï¿½Ä¡ ï¿½Ìµï¿½
         posSfxSource.transform.position = position;
 
-        // 3D »ç¿îµå·Î ¼³Á¤
+        // 3D ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         posSfxSource.spatialBlend = 1f;
 
         posSfxSource.PlayOneShot(clip, volume);
     }
     #endregion
 
-    #region º¼·ý Á¶Àý (Audio Mixer.ver)
-    // ¸¶½ºÅÍ º¼·ý ¼³Á¤ (0 ~ 100)
+    #region ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (Audio Mixer.ver)
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (0 ~ 100)
     public void SetMasterVolume(float volume)
     {
         SetMixerVolume(MASTER_VOLUME, volume);
     }
 
-    // ¹è°æÀ½ º¼·ý ¼³Á¤ (0 ~ 100)
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (0 ~ 100)
     public void SetBGMVolume(float volume)
     {
         SetMixerVolume(BGM_VOLUME, volume);
     }
 
-    // È¿°úÀ½ º¼·ý ¼³Á¤ (0 ~ 100)
+    // È¿ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (0 ~ 100)
     public void SetSFXVolume(float volume)
     {
         SetMixerVolume(SFX_VOLUME, volume);
@@ -323,7 +328,7 @@ public class SoundManager : Singleton<SoundManager>
 
     private void SetMixerVolume(string parameterName, float volume)
     {
-        // 0~100 ¡æ 0~1 ¡æ -80dB ~ 0dB º¯È¯
+        // 0~100 ï¿½ï¿½ 0~1 ï¿½ï¿½ -80dB ~ 0dB ï¿½ï¿½È¯
         float normalized = Mathf.Clamp(volume, 0f, 100f) / 100f;
         float dB = normalized > 0.0001f ? Mathf.Log10(normalized) * 20f : -80f;
         audioMixer.SetFloat(parameterName, dB);
@@ -337,25 +342,25 @@ public class SoundManager : Singleton<SoundManager>
     {
         if (audioMixer.GetFloat(parameterName, out float dB))
         {
-            // -80dB ~ 0dB ¡æ 0~100 º¯È¯
+            // -80dB ~ 0dB ï¿½ï¿½ 0~100 ï¿½ï¿½È¯
             return Mathf.Pow(10f, dB / 20f) * 100f;
         }
         return 50f;
     }
 
-    // ÀüÃ¼ À½¼Ò°Å
+    // ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½Ò°ï¿½
     public void MuteAll(bool mute)
     {
         SetMasterVolume(mute ? 0f : 100f);
     }
 
-    // ¹è°æÀ½ À½¼Ò°Å
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ò°ï¿½
     public void MuteBGM(bool mute)
     {
         SetBGMVolume(mute ? 0f : 100f);
     }
 
-    // È¿°úÀ½ À½¼Ò°Å
+    // È¿ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ò°ï¿½
     public void MuteSFX(bool mute)
     {
         SetSFXVolume(mute ? 0f : 100f);

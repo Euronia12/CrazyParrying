@@ -9,6 +9,7 @@ public class UIManager : Singleton<UIManager>
     public Dictionary<string, UIBase> uiList = new();
     public HashSet<string> loadKey = new();
     [SerializeField] private List<Transform> parents;
+    [SerializeField] Canvas canvas;
     public override void Init()
     {
         base.Init();
@@ -20,13 +21,20 @@ public class UIManager : Singleton<UIManager>
 
         if (uiList.TryGetValue(key, out var ui))
         {
+            ui.SetActive(true);
             ui.Setup();
             return (T)ui;
         }
 
         if (loadKey.Contains(key))
         {
-            Debug.LogWarning($"{key} is already loading.");
+            // 로딩 완료될 때까지 대기 후 반환
+            await UniTask.WaitUntil(() => !loadKey.Contains(key));
+            if (uiList.TryGetValue(key, out var loaded))
+            {
+                loaded.Setup();
+                return (T)loaded;
+            }
             return null;
         }
 
@@ -34,7 +42,7 @@ public class UIManager : Singleton<UIManager>
         try
         {
             T prefab = null;
-            await ResourceManager.Instance.LoadAsset<T>(key, eAddressableType.ui, obj =>
+            await ResourceManager.Instance.LoadAsset<T>(key, eAddressableType.UI, obj =>
             {
                 prefab = obj;
             });
@@ -87,4 +95,8 @@ public class UIManager : Singleton<UIManager>
         return false;
     }
 
+    public void SetCanvasCamera()
+    {
+        canvas.worldCamera = Camera.main;
+    }
 }

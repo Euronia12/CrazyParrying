@@ -13,39 +13,35 @@ public class LoadingManager : Singleton<LoadingManager>
     public static Action OnComplete = null;
     private bool isLoading = false;
 
-    public void LoadScene(string sceneAddress)
+    public void LoadScene(string sceneAddress, Action action = null)
     {
         if(isLoading) return;
         isLoading = true;
 
         nextSceneAddress = sceneAddress;
-        StartCoroutine(CoLoadScene());
+        StartCoroutine(CoLoadScene(action));
     }
 
-    IEnumerator CoLoadScene()
+    IEnumerator CoLoadScene(Action action = null)
     {
         yield return null;
 
-        // 1. 주소 기반 씬 로드 시작 (Single 모드)
-        var sceneHandle = Addressables.LoadSceneAsync(nextSceneAddress, LoadSceneMode.Single);
-        sceneHandle.Completed += handle =>
-        {
-            Resources.UnloadUnusedAssets();
-            GC.Collect();
-        };
+        var sceneHandle = SceneManager.LoadSceneAsync(nextSceneAddress);
 
-        // 2. 로딩 퍼센트 기다림 (비동기)
-        while (!sceneHandle.IsDone)
+        while (!sceneHandle.isDone)
         {
             yield return null;
         }
 
-        // 3. 완료 콜백
+        Resources.UnloadUnusedAssets();
+        GC.Collect();
+
         OnComplete?.Invoke();
         OnComplete = null;
 
-        // 4. 페이드 처리
+        action?.Invoke();
 
-        isLoading = true;
+        UIManager.Instance.SetCanvasCamera();
+        isLoading = false;
     }
 }

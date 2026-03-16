@@ -11,7 +11,7 @@ public class Singleton<T> : SerializedMonoBehaviour where T : SerializedMonoBeha
             if (instance == null)
             {
                 instance = FindFirstObjectByType<T>();
-                if(instance != null)
+                if(instance == null)
                 {
                     instance = new GameObject(typeof(T).Name).AddComponent<T>();
                 }
@@ -21,7 +21,7 @@ public class Singleton<T> : SerializedMonoBehaviour where T : SerializedMonoBeha
         protected set { instance = value; }
     }
     [SerializeField] private bool isDontDestory = true;
-    private static bool isQuitting = false; // 앱 종료 시 생성 방지용
+    protected static bool isQuitting = false; // 앱 종료 시 생성 방지용
 
     protected virtual void Awake()
     {

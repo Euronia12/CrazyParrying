@@ -30,58 +30,46 @@ public class ResourceManager : Singleton<ResourceManager>
     public async Task CLoadAddressable()
     {
         await Addressables.InitializeAsync();
-        Debug.Log("¾îµå·¹¼­ºí ÃÊ±âÈ­ ¿Ï·á");
         var handle = Addressables.DownloadDependenciesAsync("InitDownload");
-        Debug.Log("´Ù¿î·Îµå ½ÃÀÛ");
 
         while (!handle.IsDone)
-        {
-            Debug.Log($"´Ù¿î·Îµå ÁøÇà·ü: {handle.PercentComplete * 100}%");
             await UniTask.Yield();
-        }
-        Debug.Log("´Ù¿î·Îµå ¿Ï·á »óÅÂ È®ÀÎ");
 
-        switch (handle.Status)
-        {
-            case AsyncOperationStatus.None:
-                break;
-            case AsyncOperationStatus.Succeeded:
-                Debug.Log("´Ù¿î·Îµå ¼º°ø!");
-                break;
-            case AsyncOperationStatus.Failed:
-                Debug.Log("´Ù¿î·Îµå ½ÇÆÐ : " + handle.OperationException.Message);
-                Debug.LogError(handle.OperationException.ToString());
-                break;
-            default:
-                break;
-        }
+        if (handle.Status == AsyncOperationStatus.Failed)
+            Debug.LogError(handle.OperationException.ToString());
         Addressables.Release(handle);
-        InitAddressableMap();
+        await InitAddressableMap();
     }
 
-    private void InitAddressableMap()
+    private async UniTask InitAddressableMap()
     {
-        int adIndex = 0;
-        Addressables.LoadAssetsAsync<TextAsset>("AddressableMap", (text) =>
+        foreach (eAddressableType type in Enum.GetValues(typeof(eAddressableType)))
         {
-            var map = JsonUtility.FromJson<AddressableMapData>(text.text);
-            var key = eAddressableType.prefab;
-            Dictionary<string, AddressableMap> mapDic = new Dictionary<string, AddressableMap>();
-            foreach (var data in map.list)
-            {
-                key = data.addressableType;
-                if (!mapDic.ContainsKey(data.key))
-                    mapDic.Add(data.key, data);
-            }
-            if (!addressableMap.ContainsKey(key)) addressableMap.Add(key, mapDic);
-            if (adIndex++ == (int)eAddressableType.max - 1)
-            {
+            addressableMap[type] = new Dictionary<string, AddressableMap>();
+        }
 
-                Debug.Log(adIndex);
-                isInit = true;
-            }
-        });
+        var assets = await Addressables.LoadAssetsAsync<TextAsset>("AddressableMap", null);
 
+        if (assets == null || assets.Count == 0)
+        {
+            Debug.LogError("[ResourceManager] AddressableMap ï¿½ï¿½ï¿½Ìºï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½!");
+            return;
+        }
+        
+        foreach (var textAsset in assets)
+        {
+            var mapData = JsonUtility.FromJson<AddressableMapData>(textAsset.text);
+            if (mapData == null || mapData.list.Count == 0) continue;
+
+            foreach (var data in mapData.list)
+            {
+                addressableMap[data.addressableType].TryAdd(data.key, data);
+            }
+        }
+
+        Addressables.Release(assets);
+
+        isInit = true;
     }
 
     public List<string> GetPaths(string key, eAddressableType addressableType, eAssetType assetType)
@@ -158,7 +146,7 @@ public class ResourceManager : Singleton<ResourceManager>
 
     public T GetAsset<T>(string key)
     {
-        // ¾îµå·¹¼­ºí µ¿±â ·Îµå ÇÙ½É: .WaitForCompletion()
+        // ï¿½ï¿½å·¹ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½ ï¿½Ù½ï¿½: .WaitForCompletion()
         var handle = Addressables.LoadAssetAsync<T>(key);
         var loadedPrefab = handle.WaitForCompletion();
         return loadedPrefab;

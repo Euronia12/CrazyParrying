@@ -12,3 +12,16 @@ public enum eAudioType
     Bgm,
     Sfx
 }
+
+public enum eDifficulty
+{
+    Easy,
+    Normal,
+    Hard
+}
+
+public enum BalloonType 
+{ 
+    Enemy, 
+    Cannon 
+}
