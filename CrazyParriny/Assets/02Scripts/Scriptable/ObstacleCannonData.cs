@@ -4,14 +4,14 @@ using UnityEngine;
 public class ObstacleCannonData : ScriptableObject
 {
     [Header("Fire")]
-    public float fireInterval = 4f;  // ����Ʈ ����
-    public int shotsPerBurst = 3;   // ����Ʈ�� �߻� ��
-    public float shotDelay = 0.5f;// �߻� �� ������
-    public float accuracy = 0.7f;// �÷��̾� ���� Ȯ�� 0~1
+    public float fireInterval = 4f;  
+    public int shotsPerBurst = 3;  
+    public float shotDelay = 0.5f;
+    public float accuracy = 0.7f;
 
     [Header("Barrel")]
-    public float barrelRotateSpeed = 120f; // ���� ȸ�� �ӵ� (��/��)
-    public float resetDuration = 0.8f; // �⺻ ���� ���� �ð�
+    public float barrelRotateSpeed = 120f; 
+    public float resetDuration = 0.8f; 
 
     [Header("Balloon")]
     public float balloonDamage = 1f;

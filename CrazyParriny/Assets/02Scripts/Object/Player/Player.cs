@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Player : ObjectPoolBase, IDamageable
 {
@@ -72,7 +73,13 @@ public class Player : ObjectPoolBase, IDamageable
         // SetActive(false) 전에 카메라 분리 — 카메라가 Player 자식이면 같이 꺼지므로
         var cam = Camera.main;
         if (cam != null && cam.transform.parent == transform)
+        {
             cam.transform.SetParent(null);
+            // Player는 DontDestroyOnLoad 계층이므로 SetParent(null)만 하면
+            // 카메라가 DontDestroyOnLoad 루트에 남아 씬 재로드 시 중복 카메라 발생.
+            // 활성 씬으로 되돌려 씬 생명주기를 따르게 함.
+            SceneManager.MoveGameObjectToScene(cam.gameObject, SceneManager.GetActiveScene());
+        }
 
         UIManager.Instance.Hide<UINaviPlayerHit>();
         UIManager.Instance.Hide<UIMain>();
